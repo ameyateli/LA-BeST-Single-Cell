@@ -132,5 +132,15 @@ par(mfrow = c(1, 2))
 hist(log_gene47, main = "Normalized Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
 hist(gene47, main = "Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
 
+# trying this on mtatp 
+log_curr_row <- log_counts[c("MT-ATP6"),]
+hist(log_curr_row, right = FALSE, breaks = max(log_curr_row)+1, main = "Frequency of Cells expressing MT-ATP6")
+curr_row <- counts[c("MT-ATP6"),]
+hist(curr_row, right = FALSE, breaks = max(curr_row)+1, main = "Frequency of Cells expressing MT-ATP6")
+
+#normalization works!!! 
+par(mfrow = c(1, 2)) 
+hist(log_curr_row, right = FALSE, breaks = max(log_curr_row)+1, main = "Normalized Frequency of Cells expressing MT-ATP6", col = "olivedrab2")
+hist(curr_row, right = FALSE, breaks = max(curr_row)+1, main = "Frequency of Cells expressing MT-ATP6", col = "purple")
 
 
