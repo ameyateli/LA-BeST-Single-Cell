@@ -127,6 +127,10 @@ gene47 <- counts[47, ]
 hist(gene47, main = "Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
 
 
+# plotting them together 
+par(mfrow = c(1, 2)) 
+hist(log_gene47, main = "Normalized Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
+hist(gene47, main = "Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
 
 
 
