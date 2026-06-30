@@ -1,0 +1,116 @@
+---
+title: "Single_Cell_Main_Code"
+output: html_document
+---
+
+Some libraries we will need: 
+```{r}
+library(Seurat)
+library(SingleCellExperiment)
+library(dplyr)
+library(Matrix)
+library(ggplot2)
+```
+
+First we will load the data in: 
+```{r}
+# insert file path here 
+load('/Users/ameyateli/LAs BeST/Single Cell/sce.Rdata')
+```
+
+We want to normalize the counts across the single cell experiment, to do this we can convert our single cell experiment object to a Seurat object to utilize the functionality built into Seurat: 
+This website has useful information for these preliminary steps <https://satijalab.org/seurat/articles/pbmc3k_tutorial> 
+
+## Using a Seurat Object 
+-following the tutorial on the seurat website, a guided clustering tutorial 
+
+```{r}
+# converting SingleCellExperiment object to a Seurat object 
+
+# first we need to extract the metadata from the single cell object
+sce_meta <- as.data.frame(colData(sce))
+
+# creating Seurat object from single cell experiment counts matrix
+seurat_obj <- CreateSeuratObject(
+  counts = counts, 
+  meta.data = sce_meta, 
+  project = "sce")
+
+# normalizing the seurat object using NormalizeData 
+norm_so <- NormalizeData(seurat_obj)
+
+norm_so
+```
+
+The steps of normalization are as follows: 
+- first each cell is divided by totals (colSums)
+- next they are multiplied by an arbitrarily large constant, in this case it is 10,000
+- now we apply log normalization, log1p is the function 
+- log1p does log after adding 1, this is because of the amount of 0's in our data set 
+
+Now we begin following the Seurat guided clustering tutorial. 
+
+Step 1: Identification of highly variable features (feature selection)
+We will select the first 2000 features, the 2000 most variable features (i.e. genes)
+
+```{r}
+norm_so <- FindVariableFeatures(norm_so, selection.method = "vst", nfeatures = 2000) 
+# using the default number of features which is 2000
+
+# look at the top 10 most variable features 
+top10 <- head(VariableFeatures(norm_so), 10)
+top10
+```
+
+We can also look at plots of the variable features, these plots include both the features of interest that we have selected as well as the other 4260 that aren't included. 
+
+```{r}
+plot1 <- VariableFeaturePlot(norm_so)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot1 + plot2
+```
+
+Step 2: Scaling the data 
+```{r}
+all.genes <- rownames(norm_so)
+norm_so <- ScaleData(norm_so, features = all.genes)
+```
+
+Step 3: Performing linear dimensional reduction 
+This code block below performs Principal Component Analysis (PCA)
+```{r}
+norm_so <- RunPCA(norm_so, features = VariableFeatures(object = norm_so), seed.use = 10)
+```
+
+View the 5 genes that have the highest coefficients with relation to the principal component. 
+```{r}
+print(norm_so[["pca"]], dims = 1:5, nfeatures = 5)
+```
+
+Viewing this graphically. 
+```{r}
+VizDimLoadings(norm_so, dims = 1:2, reduction = "pca")
+```
+
+Look at the PC1 and PC2 on a plot. 
+```{r}
+DimPlot(norm_so, reduction = "pca") + NoLegend()
+```
+
+Looking at our elbow plot we can select the number of principal components which make sense for our analysis. 
+```{r}
+ElbowPlot(norm_so, ndims = 50)
+```
+
+Here we are finding the shared nearest neighbors of each of the cells only using the 25 PC's, we are currently in 25 dimensions. First we find the neighbors then we find the clusters. We have set the seed for reproducability. 
+```{r}
+set.seed(10)
+norm_so <- FindNeighbors(norm_so, dims = 1:25)
+norm_so <- FindClusters(norm_so, resolution = 0.5, random.seed = 10)
+```
+
+The following graph is running UMAP for clustering. This is not useful for downstream analysis due to the randomness of the UMAP algorithm. 
+```{r}
+norm_so <- RunUMAP(norm_so, dims = 1:25)
+DimPlot(norm_so, reduction = "umap")
+```
