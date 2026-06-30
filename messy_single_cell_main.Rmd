@@ -1,0 +1,343 @@
+---
+title: "DataExploration"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+library(Seurat)
+library(SingleCellExperiment)
+library(dplyr)
+library(Matrix)
+library(ggplot2)
+```
+
+```{r load the data}
+load('/Users/ameyateli/LAs BeST/Single Cell/sce.Rdata')
+```
+
+use R to plot the distribution of a single gene across all the cells
+pick diff genes, play around with plots etc. assay, functions in the
+document try a few transformations to see something
+
+```{r}
+# exploring the data, 
+class(sce)
+
+Assays(sce)
+
+dim(sce) # dimensions of count matrix
+
+sce[1:10, 1:3] # examining matrix
+
+sce[7, 1:3]
+```
+
+```{r}
+counts <- counts(sce) # accessing the counts matrix
+
+
+# looking at a specific cell/cells and its totals 
+counts_per_cell <- Matrix::colSums(counts)
+
+cat("counts per cell: ", counts_per_cell[1:5], "\n") ## counts for first 5 cells
+
+# cell number 7
+cat("counts per cell: ", counts_per_cell[7], "\n") ## counts for cell 7
+
+```
+
+```{r}
+# looking at a specific gene and its totals 
+counts_per_gene <- Matrix::rowSums(counts)
+
+# gene number 7
+cat("counts per gene: ", counts_per_gene[7], "\n") ## counts for cell 7
+
+
+# barplot of row7: gene7
+gene7 <- counts[7, ]
+
+barplot(gene7, main = "Times Gene 7 Was Expressed Per Cell")
+
+hist(gene7, main = "Frequency of Cells expressing gene 7", breaks=11, right = FALSE)
+hist(log10(gene7), main = "Frequency of Cells expressing gene 7")
+
+# this gene is called UBE2J2
+jpeg(filename = "gene7_ube2j2_plot.jpg", width = 800, height = 600, quality = 90)
+hist(gene7, main = "Frequency of Cells expressing UBE2J2", breaks=11, right = FALSE, col = "mediumblue", xlab = "Gene UBE2J2")
+dev.off()
+
+
+```
+
+```{r}
+
+# barplot of row 47: gene 47
+gene47 <- counts[47, ]
+
+barplot(gene47, main = "Times Gene 47 Was Expressed Per Cell")
+
+hist(gene47, main = "Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
+hist(log10(gene47), main = "Frequency of Cells expressing gene 47")
+
+boxplot(gene47, main = "Frequency of Cells expressing gene 47")
+
+```
+
+```{r}
+# both gene 7 and gene 47
+boxplot(gene7, gene47, main = "Frequency of Cells expressing gene 7 and gene 47")
+```
+
+```{r}
+# testing different genes 
+hist(counts[6000,])
+
+
+# histogram of MT-ATP6
+curr_row <- counts[c("MT-ATP6"),]
+hist(curr_row, right = FALSE, breaks = max(curr_row)+1, main = "Frequency of Cells expressing MT-ATP6")
+```
+
+```{r}
+# exploring metadata
+cell_info <- colData(sce)
+head(cell_info)
+```
+
+```{r}
+# 
+hist(log(gene7 + 1), main = "Frequency of Cells expressing gene 7", breaks=11, right = FALSE)
+hist(log(gene7), main = "Frequency of Cells expressing gene 7", breaks=11, right = FALSE)
+
+
+# Load the package
+library(scater)
+```
+
+```{r}
+plotColData(sce, y = "nGene")
+plotColData(sce, y = "stage")
+plotColData(sce, y = "type")
+plotColData(sce, y = "nUMI")
+plotColData(sce, y = "doublet_score")
+plotColData(sce, x = "sample", y = "type")
+
+colData(sce, y = "sample")
+
+plotColData(sce, x = "sample", y = "stage")
+
+
+```
+
+```{r}
+colnames(colData(sce))
+```
+
+```{r}
+plotColData(sce, x = "stage", y = "nGene", 
+            color_by = "stage") + 
+  scale_color_manual(values = c(
+    "early" = "darkolivegreen", 
+    "locAdv" = "gold", 
+    "metast" = "tomato"
+  ))
+```
+
+```{r}
+# normalization 
+
+sce <- logNormCounts(sce)
+assayNames(sce)
+
+log_counts <- logcounts(sce) # accessing the counts matrix
+
+# after normalization 
+log_gene47 <- log_counts[47,]
+hist(log_gene47, main = "Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
+
+# before normalization to compare 
+gene47 <- counts[47, ]
+hist(gene47, main = "Frequency of Cells expressing gene 47", breaks=11, right = FALSE)
+
+# gene 47 is called SPEN 
+jpeg(filename = "gene47_spen_plot.jpg", width = 800, height = 600, quality = 90)
+hist(gene47, main = "Frequency of Cells expressing SPEN", breaks=11, right = FALSE, col = "maroon", xlab = "Gene SPEN")
+dev.off()
+
+# plotting them together 
+par(mfrow = c(1, 2)) 
+hist(log_gene47, main = "Normalized Frequency of Cells expressing gene 47", breaks=11, right = FALSE, col = "mediumpurple2")
+hist(gene47, main = "Frequency of Cells expressing gene 47", breaks=11, right = FALSE, col = "hotpink4")
+```
+
+
+
+```{r}
+# trying this on mtatp 
+log_curr_row <- log_counts[c("MT-ATP6"),]
+hist(log_curr_row, right = FALSE, breaks = max(log_curr_row)+1, main = "Frequency of Cells expressing MT-ATP6")
+curr_row <- counts[c("MT-ATP6"),]
+hist(curr_row, right = FALSE, breaks = max(curr_row)+1, main = "Frequency of Cells expressing MT-ATP6")
+
+#normalization works!!! 
+jpeg(filename = "normalization_plots.jpg", width = 800, height = 600, quality = 90)
+par(mfrow = c(1, 2), oma = c(0, 0, 3, 0)) 
+hist(curr_row, right = FALSE, breaks = max(curr_row)+1, main = "Before Normalization", col = "magenta3", border = "magenta3", xlab = "Gene Expression Counts")
+hist(log_curr_row, right = FALSE, breaks = max(log_curr_row)+1, main = "Normalized Frequency of MTATP6", col = "olivedrab2", xlab = "Log of Gene Expression Counts")
+mtext("Frequency of Gene Expression Counts for MTATP6", side = 3, outer = TRUE, cex = 1.5, font = 2, line = 1)
+dev.off()
+
+jpeg(filename = "before_norm.jpg", width = 800, height = 600, quality = 90)
+hist(curr_row, right = FALSE, breaks = max(curr_row)+1, main = "Before Normalization", col = "magenta3", border = "magenta3", xlab = "Gene Expression Counts")
+dev.off()
+
+hist(curr_row, right = FALSE, breaks = max(curr_row)+1, main = "Before Normalization", col = "magenta3", border = "magenta3", xlab = "Gene Expression Counts")
+hist(log_curr_row, right = FALSE, breaks = max(log_curr_row)+1, main = "Normalized Frequency of MTATP6", col = "olivedrab2", xlab = "Log of Gene Expression Counts")
+
+```
+
+## Using a Seurat Object 
+-following the tutorial on the seurat website, a guided clustering tutorial 
+
+```{r}
+# trying the second option - converting SingleCellExperiment object to a Seurat object 
+sce_meta <- as.data.frame(colData(sce))
+
+# creating seurat object from single cell experiment counts matrix
+seurat_obj <- CreateSeuratObject(
+  counts = counts, 
+  meta.data = sce_meta, 
+  project = "sce")
+
+# normalizing the seurat object
+norm_so <- NormalizeData(seurat_obj)
+
+norm_so
+```
+
+```{r}
+# exploring the seurat object 
+
+norm_so[1, 1:3]
+norm_so
+
+# looking at first 6 rownames
+head(x = rownames(x = norm_so))
+
+# looking at first 6 colnames
+head(x = colnames(x = norm_so))
+
+norm_so[['RNA']]
+
+```
+
+```{r}
+# creating plots from Seurat normalized object 
+
+row47_seu <- LayerData(norm_so, assay = "RNA", layer = "counts")[47,]
+
+par(mfrow = c(1,2))
+
+hist(row47_seu, breaks=11, right = FALSE)
+
+# comparing our seurat normalized to the SCE normalization 
+hist(gene47, main = "Frequency of Cells expressing gene 47, SCE object", breaks=11, right = FALSE)
+
+```
+
+Visualization of normal vs tumor cell counts for data presentation
+slideshow
+
+```{r, eval= FALSE}
+# plotColData(sce_meta, y = type)
+# 
+# cell_counts <- table(sce_meta$type)
+# 
+# barplot(cell_counts, xlab = "Normal vs. Tumor", ylab = "Number of Cells", col = c("skyblue", "tomato"))
+# 
+# jpeg(filename = "cell_count_normalvstumor.jpg", width = 800, height = 600, quality = 90)
+# barplot(cell_counts, xlab = "Normal vs. Tumor", ylab = "Number of Cells", col = c("skyblue", "tomato"), main = "Cell Counts of Normal vs Tumor Samples")
+# dev.off
+```
+
+6/24
+
+normalization steps: divide by totals, colSums multiplies by 10,000 \<--
+arbitrary large constant applies log normalization \<-- log1p(), does
+log but adds one to ensure 0 still is 0, not -(infinity) \^natural log
+
+follow seurat tutorial, get to pca and dimensionality reduction, then
+elbow plot (pick PCA \#) if time UMAP \<-- clustering, just a function
+
+Attempt at PCA using the Seurat object
+
+norm_so is the seurat object that is normalized
+
+### Identification of highly variable features (feature selection)
+
+```{r}
+norm_so <- FindVariableFeatures(norm_so, selection.method = "vst", nfeatures = 2000) 
+# using the default number of features which is 2000
+
+top10 <- head(VariableFeatures(norm_so), 10)
+top10
+```
+
+```{r}
+plot1 <- VariableFeaturePlot(norm_so)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot1 + plot2
+```
+
+Scaling the Data
+
+```{r}
+all.genes <- rownames(norm_so)
+norm_so <- ScaleData(norm_so, features = all.genes)
+```
+
+Performing linear dimensional reduction
+
+```{r}
+norm_so <- RunPCA(norm_so, features = VariableFeatures(object = norm_so), seed.use = 10)
+```
+
+```{r}
+print(norm_so[["pca"]], dims = 1:5, nfeatures = 5)
+```
+
+```{r}
+VizDimLoadings(norm_so, dims = 1:2, reduction = "pca")
+```
+
+```{r}
+DimPlot(norm_so, reduction = "pca") + NoLegend()
+```
+
+```{r}
+DimHeatmap(norm_so, dims = 1, cells = 500, balanced = TRUE)
+```
+
+```{r}
+ElbowPlot(norm_so, ndims = 50)
+```
+
+```{r}
+set.seed(10)
+norm_so <- FindNeighbors(norm_so, dims = 1:25)
+norm_so <- FindClusters(norm_so, resolution = 0.5, random.seed = 10)
+```
+
+```{r}
+norm_so <- RunUMAP(norm_so, dims = 1:25)
+DimPlot(norm_so, reduction = "umap")
+```
+
+clusters number, make git hub doc, biology, bubble plot 
+
+
+
