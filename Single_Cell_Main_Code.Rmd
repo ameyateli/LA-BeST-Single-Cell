@@ -122,5 +122,53 @@ norm_so <- RunUMAP(norm_so, dims = 1:25)
 DimPlot(norm_so, reduction = "umap")
 ```
 
+## Data visualization 
+<https://satijalab.org/seurat/articles/visualization_vignette>
+
+
+```{r}
+library(patchwork)
+```
+
+pbmc3k.final <- LoadData("pbmc3k", type = "pbmc3k.final")
+features <- c("LYZ", "CCL5", "IL32", "PTPRCAP", "FCGR3A", "PF4")
+pbmc3k.final
+
+Features of interest from this website <https://www.cellsignal.com/pathways/immune-cell-markers-human?srsltid=AfmBOor-62g2ZCxcHumdrjyNY5RON2LIRvJ7sVe0PbQzU26i7AgghEVC> 
+ HLA-DR, CD123, CD11c, HLA-DR, CD68, HLA-DR, CD11c, CD14, HLA-DR, CD206, CD86, CD3, CD56, CD3, CD56, CD3, CD19, BCMA, CD138
+
+grep checks the data frame feature names (our genes) to see if they start with the value I have provided, this is helpful because the gene names from the website are not exactly what is in our data set 
+```{r}
+grep("CD11", rownames(counts), value = TRUE)
+```
+
+
+```{r}
+features <- c("HLA-DRA", "HLA-DRB5", "HLA-DRB1", "CD68", "CD14", "CD86", "CD3E", "CD3G", "CD3D", "CD19")
+
+features <- sort(features)
+```
+
+```{r}
+# Dot plots - the size of the dot corresponds to the percentage of cells expressing the
+# feature in each cluster. The color represents the average expression level
+DotPlot(norm_so, features = features) + RotatedAxis()
+```
+Percent expression is how many cells in that group have expressed that gene 
+Average expression is the average expression of the gene among the cells in that cluster 
+
+```{r}
+norm_so$seurat_clusters
+
+# 
+norm_so$celltype <- as.character(norm_so$seurat_clusters)
+norm_so$celltype
+
+# example of how to label our cell clusters with types of cells
+# norm_so$celltype[so$seurat_clusters == 1] <- 'CD8 Tcell'
+
+
+
+```
 
 
