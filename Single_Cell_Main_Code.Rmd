@@ -21,10 +21,12 @@ load('/Users/ameyateli/LAs BeST/Single Cell/sce.Rdata')
 We want to normalize the counts across the single cell experiment, to do this we can convert our single cell experiment object to a Seurat object to utilize the functionality built into Seurat: 
 This website has useful information for these preliminary steps <https://satijalab.org/seurat/articles/pbmc3k_tutorial> 
 
-## Using a Seurat Object 
+## Normalization 
 -following the tutorial on the seurat website, a guided clustering tutorial 
 
 ```{r}
+counts <- counts(sce) # accessing the counts matrix
+
 # converting SingleCellExperiment object to a Seurat object 
 
 # first we need to extract the metadata from the single cell object
@@ -47,6 +49,8 @@ The steps of normalization are as follows:
 - next they are multiplied by an arbitrarily large constant, in this case it is 10,000
 - now we apply log normalization, log1p is the function 
 - log1p does log after adding 1, this is because of the amount of 0's in our data set 
+
+## Seurat Guided Clustering Tutorial 
 
 Now we begin following the Seurat guided clustering tutorial. 
 
@@ -71,6 +75,7 @@ plot1 + plot2
 ```
 
 Step 2: Scaling the data 
+This places the 'middle' of the data at the origin so we can do PCA. 
 ```{r}
 all.genes <- rownames(norm_so)
 norm_so <- ScaleData(norm_so, features = all.genes)
@@ -92,25 +97,30 @@ Viewing this graphically.
 VizDimLoadings(norm_so, dims = 1:2, reduction = "pca")
 ```
 
-Look at the PC1 and PC2 on a plot. 
+Look at the PC1 and PC2 on a plot. We can see that the cells are more spread out on the PC1 axis which shows how this is the plane of the most variability. 
 ```{r}
 DimPlot(norm_so, reduction = "pca") + NoLegend()
 ```
 
-Looking at our elbow plot we can select the number of principal components which make sense for our analysis. 
+Looking at our elbow plot we can select the number of principal components which make sense for our analysis. We have selected 25 because that is where it appears to begin to decrease linearly, where most of the variability has been explained. 
 ```{r}
 ElbowPlot(norm_so, ndims = 50)
 ```
 
-Here we are finding the shared nearest neighbors of each of the cells only using the 25 PC's, we are currently in 25 dimensions. First we find the neighbors then we find the clusters. We have set the seed for reproducability. 
+Here we are finding the shared nearest neighbors of each of the cells only using the 25 PC's, we are currently in 25 dimensions. First we find the neighbors, then we find the clusters. We have set the seed for reproduce-ability.
+
+Shared nearest neighbors works by creating an edge between two nodes if they share n amount of nearest neighbors. 
 ```{r}
 set.seed(10)
 norm_so <- FindNeighbors(norm_so, dims = 1:25)
 norm_so <- FindClusters(norm_so, resolution = 0.5, random.seed = 10)
 ```
 
-The following graph is running UMAP for clustering. This is not useful for downstream analysis due to the randomness of the UMAP algorithm. 
+The following graph is running UMAP for clustering. This is not useful for downstream analysis due to the randomness of the UMAP algorithm. However, it is a helpful visualiztion for initial data exploration. 
 ```{r}
 norm_so <- RunUMAP(norm_so, dims = 1:25)
 DimPlot(norm_so, reduction = "umap")
 ```
+
+
+
