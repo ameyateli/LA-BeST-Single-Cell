@@ -49,6 +49,7 @@ The steps of normalization are as follows:
 - next they are multiplied by an arbitrarily large constant, in this case it is 10,000
 - now we apply log normalization, log1p is the function 
 - log1p does log after adding 1, this is because of the amount of 0's in our data set 
+- log reigns in outliers, makes data more normal, distribution after 0 
 
 ## Seurat Guided Clustering Tutorial 
 
@@ -76,9 +77,10 @@ plot1 + plot2
 
 Step 2: Scaling the data 
 This places the 'middle' of the data at the origin so we can do PCA. 
+remove this 
 ```{r}
-all.genes <- rownames(norm_so)
-norm_so <- ScaleData(norm_so, features = all.genes)
+#all.genes <- rownames(norm_so)
+#norm_so <- ScaleData(norm_so, features = all.genes)
 ```
 
 Step 3: Performing linear dimensional reduction 
@@ -166,7 +168,6 @@ norm_so$celltype
 
 # example of how to label our cell clusters with types of cells
 # norm_so$celltype[so$seurat_clusters == 1] <- 'CD8 Tcell'
-
 
 
 ```
