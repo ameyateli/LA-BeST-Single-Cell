@@ -141,12 +141,12 @@ Features of interest from this website <https://www.cellsignal.com/pathways/immu
 
 grep checks the data frame feature names (our genes) to see if they start with the value I have provided, this is helpful because the gene names from the website are not exactly what is in our data set 
 ```{r}
-grep("CD11", rownames(counts), value = TRUE)
+grep("CD200", rownames(counts), value = TRUE)
 ```
 
 
 ```{r}
-features <- c("HLA-DRA", "HLA-DRB5", "HLA-DRB1", "CD68", "CD14", "CD86", "CD3E", "CD3G", "CD3D", "CD19")
+features <- c("HLA-DRA", "HLA-DRB5", "HLA-DRB1", "CD68", "CD86", "CD3E", "CD3G", "CD3D", "CD1A", "CD5", "CD7", "CD200", "CD4", "CD8A", "CD8B", "CD1D", "CD160", "IL21R", "CD34", "CD38", "CD48", "CD14", "CXCR3", "CD1C", "CD163", "CD200R1", "CD81", "VEGFB", "VEGFA", "ZAP70", "CD207", "CD9", "CD19", "CD27", "CD33", "CD40", "CD69", "CD84", "FCER1A", "FLT3", "RORC")
 
 features <- sort(features)
 ```
