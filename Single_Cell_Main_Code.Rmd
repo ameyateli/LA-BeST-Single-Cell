@@ -79,8 +79,8 @@ Step 2: Scaling the data
 This places the 'middle' of the data at the origin so we can do PCA. 
 remove this 
 ```{r}
-#all.genes <- rownames(norm_so)
-#norm_so <- ScaleData(norm_so, features = all.genes)
+all.genes <- rownames(norm_so)
+norm_so <- ScaleData(norm_so, features = all.genes)
 ```
 
 Step 3: Performing linear dimensional reduction 
