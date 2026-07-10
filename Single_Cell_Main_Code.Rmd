@@ -173,3 +173,121 @@ norm_so$celltype
 ```
 
 
+### Fixing clusters to match group members 
+Because my clusters were different than group members: I will read the clusters in and add them manually 
+
+```{r}
+clus <- readRDS('clusters.rds')
+norm_so$seurat_clusters <- clus
+
+#set the idents to be my new clustering 
+Idents(norm_so) <- norm_so$seurat_clusters
+```
+
+
+Some features of interest that we wanted to vizualise on a bubble chart. 
+```{r}
+features <- c("HLA-DRA", "HLA-DRB5", "HLA-DRB1", "CD68", "CD86", "CD3E", "CD3G", "CD3D", "CD1A", "CD5", "CD7", "CD200", "CD4", "CD8A", "CD8B", "CD1D", "CD160", "IL21R", "CD34", "CD38", "CD48", "CD14", "CXCR3", "CD1C", "CD163", "CD200R1", "CD81", "VEGFB", "VEGFA", "ZAP70", "CD207", "CD9", "CD19", "CD27", "CD33", "CD40", "CD69", "CD84", "FCER1A", "FLT3", "RORC", "KLRG1", "ITGAM")
+
+features <- sort(features)
+```
+
+```{r}
+# Dot plots - the size of the dot corresponds to the percentage of cells expressing the
+# feature in each cluster. The color represents the average expression level
+DotPlot(norm_so, features = features) + RotatedAxis()
+```
+Percent expression is how many cells in that group have expressed that gene 
+Average expression is the average expression of the gene among the cells in that cluster 
+
+FindMarkers <-- function that tells you which genes differentiate 
+
+### Making bubble plot that includes more features 
+
+```{r}
+m_features <-c("HLA-DRA", "HLA-DRB5", "HLA-DRB1","ITGAM", "ITGAX", "IL3RA","CD68", "CD14","CD86","FCGR3A","CLEC9A","CD1C","GPR56","SIRPA","KIT","FCER1A","CD163","BST2","SIGLEC1","CD83","THBD", "BCAM")
+
+m_features <- sort(m_features)
+```
+
+```{r}
+# Dot plots - the size of the dot corresponds to the percentage of cells expressing the
+# feature in each cluster. The color represents the average expression level
+DotPlot(norm_so, features = m_features) + RotatedAxis()
+```
+
+```{r}
+l_features <-c("CD3D", "CD3E", "CD3G","CD8A","CD8B","CD4","CD19", "TNFRSF17","SDC1","SPI1","TBX21","IFNG","GATA3","FOXP3","TIFA","AHR", "CD69","IL2RA", "PTPRC", "SELL", "CCR7")
+l_features <- sort(l_features)
+```
+
+```{r}
+features <- c(m_features, l_features)
+DotPlot(norm_so, features = features) + RotatedAxis()
+```
+The bubble plot is split between myloid and lymphoid features at AHR, AHR is the start of the lymphoid genes 
+
+#### These features from from Tumor Infiltrating-immune cell human pathways image
+
+```{r}
+new_features <-c("CD83", "BST2", "HLA-DRA", "HLA-DRB5", "HLA-DRB1")
+new_features <- sort(new_features)
+```
+
+Only new feature that this really added was BST2
+
+
+### Creating Bubble Plot for Poster 
+Here we reduce the number of features graphing to make our graphic for our poster simpler
+```{r}
+m_features_small <-c("HLA-DRA", "ITGAM", "ITGAX", "IL3RA","CD68", "CD14","CD86","FCGR3A","CD1C","GPR56","SIRPA","KIT","CD163","BST2","CD83")
+
+m_features_small <- sort(m_features_small)
+
+l_features_small <-c("CD3D","CD8A","CD4","CD19", "SDC1", "SPI1", "IFNG", "GATA3", "FOXP3", "TIFA", "CD69", "IL2RA", "PTPRC", "SELL", "CCR7")
+
+l_features_small <- sort(l_features_small)
+
+length(m_features_small) + length(l_features_small)
+
+features_small <- c(m_features_small, l_features_small)
+DotPlot(norm_so, features = features_small) + RotatedAxis()
+```
+
+
+### Renaming clusters for the umap labeling 
+```{r}
+# syntax to follow 
+# norm_so$celltype[so$seurat_clusters == 1] <- 'CD8 Tcell'
+
+norm_so$celltype[norm_so$seurat_clusters == 0] <- 'Cytotoxic T Cell'
+norm_so$celltype[norm_so$seurat_clusters == 1] <- 'Cytotoxic T Cell'
+norm_so$celltype[norm_so$seurat_clusters == 2] <- 'NK Cell'
+norm_so$celltype[norm_so$seurat_clusters == 3] <- 'Macrophage'
+norm_so$celltype[norm_so$seurat_clusters == 4] <- 'Cytotoxic T Cell'
+norm_so$celltype[norm_so$seurat_clusters == 5] <- 'cDC'
+norm_so$celltype[norm_so$seurat_clusters == 6] <- 'Regulatory T Cell'
+norm_so$celltype[norm_so$seurat_clusters == 7] <- 'Cytotoxic T Cell'
+norm_so$celltype[norm_so$seurat_clusters == 8] <- 'cDC'
+norm_so$celltype[norm_so$seurat_clusters == 9] <- 'Macrophage'
+norm_so$celltype[norm_so$seurat_clusters == 10] <- 'Plasma'
+norm_so$celltype[norm_so$seurat_clusters == 11] <- 'Plasma'
+norm_so$celltype[norm_so$seurat_clusters == 12] <- 'B Cell'
+norm_so$celltype[norm_so$seurat_clusters == 13] <- 'Cytotoxic T Cell'
+norm_so$celltype[norm_so$seurat_clusters == 14] <- 'Type I NK Cell'
+norm_so$celltype[norm_so$seurat_clusters == 15] <- 'TBD'
+norm_so$celltype[norm_so$seurat_clusters == 16] <- 'cDC2'
+norm_so$celltype[norm_so$seurat_clusters == 17] <- 'Plasmacytoid Dendritic Cell'
+norm_so$celltype[norm_so$seurat_clusters == 18] <- 'Macrophage'
+norm_so$celltype[norm_so$seurat_clusters == 19] <- 'Polymorphonuclear MDSC'
+norm_so$celltype[norm_so$seurat_clusters == 20] <- 'Plasmacytoid Dendritic Cell'
+norm_so$celltype[norm_so$seurat_clusters == 21] <- 'Plasma'
+
+```
+
+
+### Running UMAP with new labeling 
+```{r}
+norm_so <- RunUMAP(norm_so, dims = 1:25)
+DimPlot(norm_so, reduction = "umap", group.by = "celltype")
+```
