@@ -291,3 +291,55 @@ norm_so$celltype[norm_so$seurat_clusters == 21] <- 'Plasma'
 norm_so <- RunUMAP(norm_so, dims = 1:25)
 DimPlot(norm_so, reduction = "umap", group.by = "celltype")
 ```
+
+
+
+### Attempting the tumor vs. normal vizualisation 
+
+```{r}
+norm_so@meta.data |>
+  ggplot(aes(fill=type, x=celltype)) + 
+  geom_bar(position='dodge') +  
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+```
+
+
+```{r}
+norm_so@meta.data |>
+  ggplot(aes(fill=type, x=celltype)) + 
+  geom_bar(position='fill') + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+```
+
+
+```{r}
+norm_so@meta.data |>
+  ggplot(aes(fill=stage, x=celltype)) + 
+  geom_bar(position='dodge') 
+```
+```{r}
+norm_so@meta.data |>
+  ggplot(aes(fill=stage, x=celltype)) + 
+  geom_bar(position='fill') 
+```
+
+```{r}
+norm_so@meta.data |>
+  ggplot(aes(fill=celltype, x=stage)) + 
+  geom_bar(position='dodge') 
+```
+```{r}
+norm_so@meta.data |>
+  ggplot(aes(fill=celltype, x=stage)) + 
+  geom_bar(position='fill')
+```
+
+```{r}
+norm_so@meta.data
+
+colnames(sce_meta)
+sce_meta
+```
+
+
+### Test for difference in proportions 
