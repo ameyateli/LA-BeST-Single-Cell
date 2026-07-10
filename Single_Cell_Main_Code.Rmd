@@ -297,6 +297,11 @@ DimPlot(norm_so, reduction = "umap", group.by = "celltype")
 ### Attempting the tumor vs. normal vizualisation 
 
 ```{r}
+library(ggplot2)
+library(scales)
+```
+
+```{r}
 norm_so@meta.data |>
   ggplot(aes(fill=type, x=celltype)) + 
   geom_bar(position='dodge') +  
